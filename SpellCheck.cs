@@ -1,12 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
-// using Google.Cloud.Translation.V2;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace DurHack_2023
 {
@@ -22,15 +20,13 @@ namespace DurHack_2023
         public async Task<List<Mistake>> CheckSpell(string text)
         {
             // URL of your locally hosted web server
-            string url = "http://localhost:8081/v2/check"; // Replace with your server's URL
+            string url = "https://api.bing.microsoft.com/v7.0/spellcheck"; // Replace with your server's URL
 
             // Create a dictionary to hold key-value pairs
             var formData = new Dictionary<string, string>
-        {
-            { "language", "en-GB" },
-            { "text", text },
-            // Add more key-value pairs as needed
-        };
+            {
+                { "text", text },
+            };
 
             // Create an instance of HttpClient
             using (HttpClient httpClient = new HttpClient())
@@ -40,6 +36,10 @@ namespace DurHack_2023
                     // Create content with the key-value pairs
                     var content = new FormUrlEncodedContent(formData);
 
+                    // Add custom headers to the request
+                    httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+                    httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "6e2302c0e20b4c4095cc7a793a059b3a");
+
                     // Send a POST request to the server
                     HttpResponseMessage response = await httpClient.PostAsync(url, content);
 
@@ -48,20 +48,19 @@ namespace DurHack_2023
                     {
                         string responseBody = await response.Content.ReadAsStringAsync();
 
-                        Match[] matches = JsonSerializer.Deserialize<RootObject>(responseBody).matches;
+                        FlaggedTokens[] matches = JsonSerializer.Deserialize<RootObject>(responseBody).flaggedTokens;
 
                         List<Mistake> mistakes = new List<Mistake>();
                         for (int i = 0; i < matches.Count(); i++)
                         {
                             Mistake mistake = new Mistake();
-                            mistake.Message = matches[i].message;
                             mistake.Index = matches[i].offset;
-                            mistake.Length = matches[i].length;
+                            mistake.Length = matches[i].token.Length;
 
                             List<string> corrections = new List<string>();
-                            for (int j = 0; j < matches[i].replacements.Count(); j++)
+                            for (int j = 0; j < matches[i].suggestions.Count(); j++)
                             {
-                                corrections.Add(matches[i].replacements[j].value); 
+                                corrections.Add(matches[i].suggestions[j].suggestion); 
                             }
                             mistake.Corrections = corrections;
                             mistakes.Add(mistake);
@@ -84,21 +83,19 @@ namespace DurHack_2023
 
         public class RootObject
         {
-            public Match[] matches { get; set; }
+            public FlaggedTokens[] flaggedTokens { get; set; }
         }
 
-        public class Match
+        public class FlaggedTokens
         {
-            public string message { get; set; }
-            public string shortMessage { get; set; }
             public int offset {  get; set; }
-            public int length { get; set; }
-            public Replacement[] replacements { get; set; }
+            public string token { get; set; }
+            public Suggestions[] suggestions { get; set; }
         }
 
-        public class Replacement
+        public class Suggestions
         {
-            public string value { get; set; }
+            public string suggestion { get; set; }
         }
     }
 }
