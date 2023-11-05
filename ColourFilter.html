@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #bg-filter {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        #bg-filter.green {
+            background-color: rgba(0, 255, 0, 0.2);
+        }
+        #bg-filter.pink {
+            background-color: rgb(247, 0, 255, 0.2);
+        }
+        #bg-filter.yellow {
+            background-color: rgba(255, 255, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-filter"></div>
+    <label for="filter-choose">Accessibility Colour Filter:</label>
+    <select id="filter-choose" onchange="UpdateFilter()">
+        <option value="none">None</option>
+        <option value="green">Green</option>
+        <option value="pink">Pink</option>
+        <option value="yellow">Yellow</option>
+    </select>
+    <script>
+        function UpdateFilter() {
+            document.getElementById("bg-filter").className = document.getElementById("filter-choose").value;
+        }
+    </script>
+</body>
+</html>
