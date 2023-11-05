@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+  #video-container {
+    position: relative;
+  }
+  video, canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  canvas {
+    pointer-events: none; /* This makes the canvas click-through */
+  }
+  #bg-filter {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+#bg-filter.green {
+    background-color: rgba(0, 255, 0, 0.2);
+}
+#bg-filter.pink {
+    background-color: rgb(247, 0, 255, 0.2);
+}
+#bg-filter.yellow {
+    background-color: rgba(255, 255, 0, 0.2);
+}
+
+
+</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Camera Capture and Send</title>
+<script>
+var words = []; // [{word: "df", "quad": [{X:31, Y: 272}, {X: 199, Y: 294}, {X: 182, Y: 421}, {X: 14, Y: 399}]}]
+let videoStream;
+
+// Start the video stream when the window loads
+window.addEventListener('load', function() {
+    const video = document.querySelector('video');
+    if (navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                videoStream = stream;
+                video.srcObject = stream;
+            })
+            .catch(function(error) {
+                console.log("Something went wrong when accessing the camera!", error);
+            });
+    }
+
+}, false);
+
+function captureImage() {
+    const canvas = document.createElement('canvas');
+    const video = document.querySelector('video');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    const base64Image = canvas.toDataURL('image/jpeg');
+    const base64Data = base64Image.split(',')[1]; // This splits the string into an array and takes the second element.
+    
+
+    // getting the mode type 
+    let mode = document.getElementById("mode").value;
+
+    let info = JSON.stringify({"Mode":mode, "Img": base64Data})
+
+
+
+    sendToServer(info);
+}
+
+function sendToServer(body) {
+    const serverEndpoint = 'http://localhost:8080/';
+
+    // Assuming the server is expecting the raw base64 string in the body without any additional headers or form data.
+    // If the server requires a different format, adjust the headers and body accordingly.
+    fetch(serverEndpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'text/plain'  // If your server expects a different content type, change it here.
+        },
+        body: body
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+        }
+        return response.text();
+    })
+    .then(data => {
+        data = JSON.parse(data);
+
+
+          if (data.TranslatedOutput) {
+            document.getElementById("translate").innerText = '';
+
+            console.log("Translated output is attached:", data.TranslatedOutput);
+            document.getElementById("translate").innerText = data.TranslatedOutput;
+
+            data = data.OriginalWords
+            
+          } 
+
+        // clearing the prev boc 
+        var canvas = document.getElementById('myCanvas');
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // clear word 
+        words = []; // [{word: "df", "quad": [{X:31, Y: 272}, {X: 199, Y: 294}, {X: 182, Y: 421}, {X: 14, Y: 399}]}]
+
+        
+ 
+  
+        data.forEach(item => {
+            words.push({'word': item.Text, "quad": item.Coords})
+            // Only proceed if the Corrections array has items
+            if (item.Corrections.length > 0) {
+            let firstTwoItemsCorrect = item.Corrections.slice(0, 2);
+            
+
+                // Extract the coordinates
+                const coords = item.Coords;
+                if (coords.length === 4) {
+                    // Call the draw_box function with the extracted coordinates
+                    draw_box(coords[0], coords[1], coords[2], coords[3], JSON.stringify(firstTwoItemsCorrect));
+                    //addButton(coords[0], coords[1], coords[2], coords[3], "charlie");
+                } else {
+                    console.error('Invalid number of coordinates for item:', item);
+                }
+            }
+        });
+
+        
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+function getDefntion(word){
+
+  fetch("https://api.dictionaryapi.dev/api/v2/entries/en/" + word).then(resp => resp.json()).then(resp => {
+    document.getElementById("def").innerText = resp[0].meanings[0].definitions[0].definition;
+  });
+
+
+}
+
+  
+
+function speakWord(word) {
+    // Create a new instance of SpeechSynthesisUtterance
+    var msg = new SpeechSynthesisUtterance(word);
+  
+    // Choose voice. Uncomment the following lines if you want to choose a voice.
+    // var voices = window.speechSynthesis.getVoices();
+    // msg.voice = voices.filter(function(voice) { return voice.name == 'Google UK English Male'; })[0];
+  
+    // Optional parameters
+    msg.volume = 1; // 0 to 1
+    msg.rate = 1; // 0.1 to 10
+    msg.pitch = 1; //0 to 2
+  
+    // Queue this utterance
+    window.speechSynthesis.speak(msg);
+  }
+  
+  // Example usage:
+  
+function draw_box(topLeft, topRight, bottomRight, bottomLeft, corrections) {
+    var canvas = document.getElementById('myCanvas');
+    if (canvas.getContext) {
+        var ctx = canvas.getContext('2d');
+
+        // Draw the box as before
+        ctx.beginPath();
+        ctx.moveTo(topLeft.X, topLeft.Y);
+        ctx.lineTo(topRight.X, topRight.Y);
+        ctx.lineTo(bottomRight.X, bottomRight.Y);
+        ctx.lineTo(bottomLeft.X, bottomLeft.Y);
+        ctx.closePath();
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Set the style for the text
+        ctx.fillStyle = 'black'; // Text color
+        ctx.font = 'bold 18px Arial'; // Text font and size
+        ctx.textAlign = 'center'; // Center the text above the box
+
+        // Calculate the position for the text
+        // We'll place it above the top-left corner of the box.
+        // You may need to adjust the offset (e.g., `topLeft.Y - 10`) to position it correctly
+        var textX = (topLeft.X + topRight.X) / 2; // Midpoint of the top line
+        var textY = topLeft.Y - 10; // Slightly above the box
+
+        // Draw the text
+        corrections = JSON.parse(corrections);
+        let concatenatedCorrections = corrections[0];
+        if (corrections[1]!= undefined){
+            concatenatedCorrections = concatenatedCorrections  + ", " + corrections[1];
+        }
+
+        ctx.fillText(concatenatedCorrections, textX, textY); 
+
+        
+    }
+}
+
+
+// Stop the video stream when the window is unloaded
+window.addEventListener('beforeunload', function() {
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+    }
+}, false);
+
+
+function startIntervalLoop() {
+    setInterval(() => {
+        // Your repeated actions here
+
+        captureImage()
+    }, 1000); // 500 milliseconds = 0.5 seconds
+}
+
+// Call the function to start the interval loop
+startIntervalLoop();
+
+function onPageClick(event) {
+
+    const point = {X: event.clientX, Y: event.clientY};
+
+    words.forEach(function(value, index) {
+        const quad = value.quad;
+        if (isPointInsideQuad(point, quad)){
+            speakWord(value.word);
+            getDefntion(value.word);
+
+        }
+    });
+}
+
+
+  // Add the event listener to the whole document
+  document.addEventListener('click', onPageClick);
+
+
+  function isPointInsideQuad(point, quad) {
+    let xt = point.X;
+    let yt = point.Y;
+    let intersections = 0;
+  
+    for (let i = 0; i < quad.length; i++) {
+      let j = (i + 1) % quad.length; // Get the next vertex
+      let xi = quad[i].X, yi = quad[i].Y;
+      let xj = quad[j].X, yj = quad[j].Y;
+  
+      // Check if point is on an edge
+      if (((yt == yi) && (xt == xi)) || ((yt == yj) && (xt == xj))) {
+        return true; // The point is on a corner of the quad
+      }
+      if ((yt > yi) != (yt > yj) && (xt < (xj - xi) * (yt - yi) / (yj - yi) + xi)) {
+        // Point is on an edge of the quad
+        if (yi == yj) {
+          return true;
+        }
+        intersections++;
+      }
+    }
+  
+    // The point is inside if the number of intersections is odd
+    return intersections % 2 == 1;
+  }
+  
+
+
+</script>
+</head>
+<body style="background-color: rgb(245, 242, 240); text-align: right; font-family: Arial, Helvetica, sans-serif; ">
+  <header style="padding-right: 20%"> <h1 style="font-size: 70px;
+            font-weight: 800;
+            color: #152943;
+            background-clip: text;
+            -webkit-background-clip: text;" > Handwrite-AR </h1>
+        </header>
+
+<video autoplay></video>
+
+<canvas id="myCanvas" width="500" height="500"></canvas>
+<main style="text-align: right; padding-right: 15%;" dir="rtl">
+  <div style="position: float; background-color:  #152943; color: white; padding: 10px; width: 40%; font-size: larger; border: 5px solid #78FA93;">
+      <h4 style="text-align: center; font-weight: 600;">This application will be able to spell-check, translate, define wordsand narrate your handwritten text in real time</h4>
+  </div>
+  <br style = "padding: 5%;">
+  <!-- this is where the translated thing will go!-->
+  <div dir="ltr" style="text-align: left;position: float; background-color: #ffffff; color: #152943; padding: 10px; width: 40%; font-size: larger;"> <h3 style= "color: red"> Translation: </h3><div id="translate" >Choose a language to translate to</div></div>
+
+  <div dir="ltr" style="text-align: left;position: float; background-color: #ffffff; color: #152943; padding: 10px; width: 40%; font-size: larger;"> <h3 style= "color: green"> Definition: </h3><div id="def" >Click a word to define</div></div>
+
+</main>
+
+
+
+
+
+
+
+<div style="padding-right:30%">
+  <p style="text-align: right;">
+    <label for="mode" ><b> Choose a mode:</b></label>
+
+      <select style= " border: 1px solid #ccc;
+                          padding: 5px;
+                          border-radius: 5px;
+                          background:#152943;
+                          color: white;
+                          width: 125px;"name="mode" id="mode">
+                         
+                          <option value="spell">English</option>
+                         
+                          <option value="french">French</option>
+                         
+                          <option value="spanish">Spanish</option>
+                         
+                          <option value="mandarin">Mandarin</option>
+                         
+                          </select>
+      
+     
+     
+      <div style="text-align: right;" id="bg-filter"></div>
+      <label style="text-align: right;" for="filter-choose"> <b> Accessibility Colour Filter:</b></label>
+      <select id="filter-choose" style="text-align: right; border: 1px solid #ccc;
+      padding: 5px;
+      border-radius: 5px;
+      background-color: #152943;
+      color: white;
+      width: 125px;" name="mode" id="mode" onchange="UpdateFilter()">
+     
+          <option value="none" style="background-color: #152943; color: white">None</option>
+     
+          <option value="green" style="background-color:rgb(152, 229, 152); color: black;">Green</option>
+     
+          <option value="pink" style="background-color:pink; color:black">Pink</option>
+     
+          <option value="yellow" style="background-color:rgb(255, 255, 193); color:black;">Yellow</option>
+     
+      </select>
+     
+     
+
+
+
+</div>
+<script>
+    function UpdateFilter() {
+        document.getElementById("bg-filter").className = document.getElementById("filter-choose").value;
+    }
+</script>
+
+<script>
+// This function will be called whenever a click event is detected on the page
+
+  
+
+  
+  
+</script>
+</p>
+</body>
+</html>
