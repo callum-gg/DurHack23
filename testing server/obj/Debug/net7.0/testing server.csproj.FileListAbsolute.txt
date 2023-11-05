@@ -1,0 +1,33 @@
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/testing server
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/testing server.deps.json
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/testing server.runtimeconfig.json
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/testing server.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/testing server.pdb
+/Users/charlescarpenter/Projects/testing server/testing server/obj/Debug/net7.0/testing server.csproj.AssemblyReference.cache
+/Users/charlescarpenter/Projects/testing server/testing server/obj/Debug/net7.0/testing server.GeneratedMSBuildEditorConfig.editorconfig
+/Users/charlescarpenter/Projects/testing server/testing server/obj/Debug/net7.0/testing server.AssemblyInfoInputs.cache
+/Users/charlescarpenter/Projects/testing server/testing server/obj/Debug/net7.0/testing server.AssemblyInfo.cs
+/Users/charlescarpenter/Projects/testing server/testing server/obj/Debug/net7.0/testing server.csproj.CoreCompileInputs.cache
+/Users/charlescarpenter/Projects/testing server/testing server/obj/Debug/net7.0/testing server.dll
+/Users/charlescarpenter/Projects/testing server/testing server/obj/Debug/net7.0/refint/testing server.dll
+/Users/charlescarpenter/Projects/testing server/testing server/obj/Debug/net7.0/testing server.pdb
+/Users/charlescarpenter/Projects/testing server/testing server/obj/Debug/net7.0/testing server.genruntimeconfig.cache
+/Users/charlescarpenter/Projects/testing server/testing server/obj/Debug/net7.0/ref/testing server.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/Emgu.CV.dll
+/Users/charlescarpenter/Projects/testing server/testing server/obj/Debug/net7.0/testing server.csproj.CopyComplete
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/SkiaSharp.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/runtimes/osx/native/libSkiaSharp.dylib
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/runtimes/win-arm64/native/libSkiaSharp.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/runtimes/win-x64/native/libSkiaSharp.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/runtimes/win-x86/native/libSkiaSharp.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/Google.Api.Gax.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/Google.Api.Gax.Rest.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/Google.Apis.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/Google.Apis.Auth.PlatformServices.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/Google.Apis.Auth.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/Google.Apis.Core.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/Google.Apis.Translate.v2.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/Google.Cloud.Translation.V2.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/Microsoft.Bcl.AsyncInterfaces.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/Users/charlescarpenter/Projects/testing server/testing server/bin/Debug/net7.0/Newtonsoft.Json.dll
