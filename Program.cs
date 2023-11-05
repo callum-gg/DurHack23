@@ -16,6 +16,11 @@ namespace DurHack_2023
             Process Process = new Process();
             List<ParsedWord> words = await Process.ProcessImage(image);
 
+            //testing the translator, change "fr" for different laguages
+            Translate Translator = new Translate();
+            string translatedOutput = await Translator.TranslateText("fr", words);
+            Console.WriteLine(translatedOutput);
+            
             Console.Read();
         }
     }
